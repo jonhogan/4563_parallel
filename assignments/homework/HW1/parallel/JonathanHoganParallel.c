@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 {
     ulong arr64[n];
     ulong totalSum = 0;
-    //ulong processSum = 0;
+    ulong processSum = 0;
 
     int procID;
     int elemPerProc;
@@ -51,6 +51,21 @@ int main(int argc, char* argv[])
 
             MPI_Send(&remainElements, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
             MPI_Send(&arr64[index], remainElements, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
+        }
+
+        for( i =0; i < elemPerProc; i++)
+        {
+            totalSum += arr64[i];
+        }
+
+
+        for(i = 1; i < nop; i++)
+        {
+            MPI_Recv(&processSum, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD, &status);
+
+            int sendingProc = status.MPI_SOURCE;
+
+            totalSum += processSum;
         }
     }
     
