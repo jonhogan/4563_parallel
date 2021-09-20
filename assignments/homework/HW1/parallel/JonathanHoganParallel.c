@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 {
     ulong arr64[n];
     ulong totalSum = 0;
-    ulong processSum = 0;
+    //ulong processSum = 0;
 
     int procID;
     int elemPerProc;
@@ -38,13 +38,19 @@ int main(int argc, char* argv[])
         if (nop > 1)
         {
             //Evenly distribute the work to the Worker/Slave Processes
-            for(i = 1; i < nop; i++)
+            for(i = 1; i < nop - 1; i++)
             {
                 index = i * elemPerProc;
 
-                MPI_Send(&elemPerProc, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-                MPI_Send(&arr64[index], elemPerProc, MPI_INT, i, 0, MPI_COMM_WORLD);
+                MPI_Send(&elemPerProc, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
+                MPI_Send(&arr64[index], elemPerProc, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
             }
+
+            index = i * elemPerProc;
+            ulong remainElements = n - index;
+
+            MPI_Send(&remainElements, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&arr64[index], remainElements, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
         }
     }
     
