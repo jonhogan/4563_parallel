@@ -38,9 +38,12 @@ int main(int argc, char* argv[])
         if (nop > 1)
         {
             //Evenly distribute the work to the Worker/Slave Processes
-            for(i = 1; i < nop -1; i++)
+            for(i = 1; i < nop; i++)
             {
-                
+                index = i * elemPerProc;
+
+                MPI_Send(&elemPerProc, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                MPI_Send(&arr64[index], elemPerProc, MPI_INT, i, 0, MPI_COMM_WORLD);
             }
         }
     }
