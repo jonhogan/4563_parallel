@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
             totalSum += processSum;
         }
 
-        
+        MPI_Finalize();
         
         printf("Total: %ld", totalSum);
     }
@@ -92,7 +92,6 @@ int main(int argc, char* argv[])
         MPI_Send(&processSum, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
     }
     
-    MPI_Finalize();
     return 0;
     
 }
