@@ -1,6 +1,5 @@
 /***************************************************************************
-COMMANDS: Stampede 2 command: mpicc JonathanHoganParallel.c -o  mycode.exe
-COMMANDS: Script command: sbatch Stampede2ScriptPart2
+
 
 Name: Jonathan Hogan 
 Course: CMPS 4563
@@ -30,7 +29,7 @@ Description:
 
 int main(void)
 {
-    int procID;                         //Process ID/Rank
+    int procID = 0;                     //Process ID/Rank
     int procNum = 64;                   //Number of processes
     int retElements = 0;                //Elements returned
     int elemPerProc = n/procNum;        //Number of elements passed to each process
@@ -74,11 +73,11 @@ int main(void)
                      0,                 //Tag
                      MPI_COMM_WORLD);
 
-            MPI_Send(&tempArr,
+            MPI_Send(tempArr,
                      1,                 //count
                      MPI_LONG_LONG,     //Data Type
                      i,                 //Destination
-                     0,                 //Tag
+                     1,                 //Tag
                      MPI_COMM_WORLD);
         }
 
@@ -139,11 +138,11 @@ int main(void)
                  MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
 
-        MPI_Recv(&tempArr,
+        MPI_Recv(tempArr,
                  retElements,
                  MPI_LONG_LONG,
                  0,
-                 0,
+                 1,
                  MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
 
