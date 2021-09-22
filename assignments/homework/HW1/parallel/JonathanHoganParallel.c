@@ -1,20 +1,21 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <mpi.h>
 
 typedef unsigned long ulong;
 #define n 640000     //Elements in the array
-#define nop 64       //Number of processes
+
 
 int main(int argc, char* argv[])
 {
     ulong arr64[n];
+    ulong workerArr[100000];
     ulong totalSum = 0;
     ulong processSum = 0;
-
+    ulong rcvdElements = 0;
     int procID;
-    int elemPerProc;
+    ulong elemPerProc;
+    int nop = 64;       //Number of processes
 
 
     for(ulong i = 0; i < 640000; i++)
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
     MPI_Init(&argc, &argv);
 
     MPI_Comm_rank(MPI_COMM_WORLD, &procID);
-    MPI_Comm_size(MPI_COMM_WORLD, nop);
+    MPI_Comm_size(MPI_COMM_WORLD, &nop);
 
     //Manager/Master Process
     if (procID == 0)
@@ -67,8 +68,29 @@ int main(int argc, char* argv[])
 
             totalSum += processSum;
         }
+        
+        printf("Total: %ld", totalSum);
     }
-    
+    //Worker processes
+    else
+    {
+        MPI_Recv(&rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, &status);
 
-    printf("%ld", totalSum);
+        //Store the received array
+        MPI_Recv(&workerArr, rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
+
+        //Calculate the partial sum per process
+        for(int i = 0; i < rcvdElements; i++)
+        {
+            processSum = workerArr[i];
+        }
+
+        //Return the the sum of the process to the Manager Process
+        MPI_Send(&processSum, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
+    }
+
+    MPI_Finalize();
+
+    return 0;
+    
 }
