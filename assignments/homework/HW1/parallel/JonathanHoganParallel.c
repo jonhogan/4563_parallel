@@ -13,8 +13,14 @@ int main(int argc, char* argv[])
     ulong totalSum = 0;
     ulong processSum = 0;
     ulong rcvdElements = 0;
+<<<<<<< HEAD
     int procID;
     ulong elemPerProc;
+=======
+
+    int procID;
+    int elemPerProc;
+>>>>>>> a99e7355fb08e19b7b118477230ccc0b13d3ade4
     int nop = 64;       //Number of processes
 
 
@@ -75,6 +81,7 @@ int main(int argc, char* argv[])
     else
     {
         MPI_Recv(&rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, &status);
+<<<<<<< HEAD
 
         //Store the received array
         MPI_Recv(&workerArr, rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
@@ -91,6 +98,24 @@ int main(int argc, char* argv[])
 
     MPI_Finalize();
 
+=======
+
+        //Store the received array
+        MPI_Recv(&workerArr, rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
+
+        //Calculate the partial sum per process
+        for(int i = 0; i < rcvdElements; i++)
+        {
+            processSum = workerArr[i];
+        }
+
+        //Return the the sum of the process to the Manager Process
+        MPI_Send(&processSum, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
+    }
+
+    MPI_Finalize();
+
+>>>>>>> a99e7355fb08e19b7b118477230ccc0b13d3ade4
     return 0;
     
 }
