@@ -1,97 +1,171 @@
+/***************************************************************************
+COMMANDS: Stampede 2 command: mpicc JonathanHoganParallel.c -o  mycode.exe
+COMMANDS: Script command: sbatch Stampede2ScriptPart2
+
+Name: Jonathan Hogan 
+Course: CMPS 4563
+Due: 09/22/21 - 0800
+
+Assignment 1
+
+Description:
+
+    Part 1: Sequential program to visit and sum all elements in an array
+            with a size of 640,000 elements.
+
+    Part 2: Rewrite the program using Parallel methologies, 64 processes
+
+    Time both.
+***************************************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
 
-typedef unsigned long ulong;
+
 #define n 640000     //Elements in the array
 
 
-int main(int argc, char* argv[])
+
+int main(void)
 {
-    ulong arr64[n];
-    ulong workerArr[100000];        //Array to pass to the worker processes to hold the assigned elements
-    ulong totalSum = 0;             //Process 0's Sum variable
-    ulong processSum = 0;           //Sum variable to the Worker processes
-    ulong rcvdElements = 0;
+    int procID;                         //Process ID/Rank
+    int procNum = 64;                   //Number of processes
+    int retElements = 0;                //Elements returned
+    int elemPerProc = n/procNum;        //Number of elements passed to each process
 
-    int procID;                     //Process ID
-    int elemPerProc;                //Number of elements passed to each process
-    int nop = 64;                   //Number of processes
+    double start, end;
 
-
-    for(ulong i = 0; i < 640000; i++)
-    {
-        arr64[i] = i + 1;           //Populate the array from 1 to 640,000
-    }
-
-    MPI_Status status;
-
-    MPI_Init(&argc, &argv);
-
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &procNum);
     MPI_Comm_rank(MPI_COMM_WORLD, &procID);
-    MPI_Comm_size(MPI_COMM_WORLD, &nop);
+    
 
-    //Manager/Master Process
+    long long tempArr[elemPerProc];
+    start = MPI_Wtime();
+
     if (procID == 0)
     {
-        int index, i;
-        elemPerProc = n/nop;        //Number of Elements/Numer of Processes
+        int index;
+        int i;
 
-        if (nop > 1)
+        long long arr64[n];
+
+        for (i = 0; i < n; i++)
         {
-            //Evenly distribute the work to the Worker Processes
-            for(i = 1; i < nop - 1; i++)
-            {
-                index = i * elemPerProc;
-
-                MPI_Send(&elemPerProc, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
-                MPI_Send(&arr64[index], elemPerProc, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
-            }
-
-            index = i * elemPerProc;
-            ulong remainElements = n - index;
-
-            MPI_Send(&remainElements, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
-            MPI_Send(&arr64[index], remainElements, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD);
+            //Fill the array with the numbers 1 to 640,000
+            arr64[i] = i + 1;
         }
 
-        for( i =0; i < elemPerProc; i++)
+        for (i = 1; i < procNum; i++)
+        {
+            for (int j = 0; j < (j+1)*elemPerProc; j++)
+            {
+                tempArr[j] = j*elemPerProc;
+            }
+
+            index = i*elemPerProc;
+
+            MPI_Send(&elemPerProc,
+                     1,                 //count
+                     MPI_LONG_LONG,     //Data Type
+                     i,                 //Destination
+                     0,                 //Tag
+                     MPI_COMM_WORLD);
+
+            MPI_Send(&tempArr,
+                     1,                 //count
+                     MPI_LONG_LONG,     //Data Type
+                     i,                 //Destination
+                     0,                 //Tag
+                     MPI_COMM_WORLD);
+        }
+
+        index = i*elemPerProc;
+
+        int remainingElements = n - index;
+        
+        MPI_Send(&remainingElements,
+                 1,                 //count
+                 MPI_LONG_LONG,     //Data Type
+                 i,                 //Destination
+                 0,                 //Tag
+                 MPI_COMM_WORLD);
+
+        MPI_Send(&arr64[index],
+                 1,                 //count
+                 MPI_LONG_LONG,     //Data Type
+                 i,                 //Destination
+                 0,                 //Tag
+                 MPI_COMM_WORLD);
+
+        long long totalSum = 0;
+
+        for (i = 0; i < elemPerProc; i++)
         {
             totalSum += arr64[i];
         }
 
+        //Manager Process receives partial sums from Worker Processes
+        long long temp;
 
-        for(i = 1; i < nop; i++)
+        for (i = 1; i < elemPerProc; i++)
         {
-            MPI_Recv(&processSum, 1, MPI_UNSIGNED_LONG, i, 0, MPI_COMM_WORLD, &status);
-
-            int sendingProc = status.MPI_SOURCE;
-
-            totalSum += processSum;
+            MPI_Recv(&temp,
+                     1,                 //count
+                     MPI_LONG_LONG,     //Data Type
+                     i,                 //Destination
+                     0,                 //Tag
+                     MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+            
+            totalSum += temp;
         }
 
-        MPI_Finalize();
-        
-        printf("Total: %ld", totalSum);
+        end = MPI_Wtime();
+
+        printf("Total: %lld", totalSum);
+        printf("Time elapsed: %f", end - start);
+
     }
-    //Worker processes
     else
     {
-        MPI_Recv(&rcvdElements, 1, MPI_UNSIGNED_LONG, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(&elemPerProc,
+                 1,                 //count
+                 MPI_LONG_LONG,     //Data Type
+                 0,                 //Destination
+                 0,                 //Tag
+                 MPI_COMM_WORLD,
+                 MPI_STATUS_IGNORE);
 
-        //Store the received array
-        MPI_Recv(&workerArr, rcvdElements, MPI_UNSIGNED_LONG, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(&tempArr,
+                 retElements,
+                 MPI_LONG_LONG,
+                 0,
+                 0,
+                 MPI_COMM_WORLD,
+                 MPI_STATUS_IGNORE);
 
-        //Calculate the partial sum per process
-        for(int i = 0; i < rcvdElements; i++)
+        long long processSum = 0;
+
+        //Sum for each process
+        for (int i = 0; i < retElements; i++)
         {
-            processSum = workerArr[i];
+            processSum =+ tempArr[i];
         }
 
-        //Return the the sum of the process to the Manager Process
-        MPI_Send(&processSum, 1, MPI_UNSIGNED_LONG, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD);
+        //Return the process sums to the Manager Process
+        MPI_Send(&processSum,
+                 1,
+                 MPI_LONG_LONG,
+                 0,
+                 0,
+                 MPI_COMM_WORLD);
     }
-    
+
+    MPI_Finalize();
     return 0;
-    
 }
+
+    
