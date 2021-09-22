@@ -77,10 +77,10 @@ int main(int argc, char* argv[])
     //Worker processes
     else
     {
-        MPI_Recv(&rcvdElements, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&rcvdElements, 1, MPI_UNSIGNED_LONG, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
         //Store the received array
-        MPI_Recv(&workerArr, rcvdElements, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&workerArr, rcvdElements, MPI_UNSIGNED_LONG, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
         //Calculate the partial sum per process
         for(int i = 0; i < rcvdElements; i++)
