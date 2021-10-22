@@ -2,7 +2,7 @@
 *   A "hello world" Pthreads program.  Demonstrates thread creation and
 *   termination.
 *   This simple example code creates 5 threads with the pthread_create() routine. 
-*   Each thread prints a “Hello World!” message, and then terminates with a call to pthread_exit().
+*   Each thread prints a ï¿½Hello World!ï¿½ message, and then terminates with a call to pthread_exit().
 ******************************************************************************/
 #include <pthread.h>
 #include <stdio.h>

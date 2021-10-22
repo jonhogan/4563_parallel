@@ -4,7 +4,7 @@
 *   to pass arguments to threads during thread creation.
 *   This code fragment demonstrates how to pass a simple integer to each thread. 
 *   The calling thread uses a unique data structure for each thread, 
-*       insuring that each thread’s argument remains intact throughout the program.
+*       insuring that each threadï¿½s argument remains intact throughout the program.
 ******************************************************************************/
 #include <pthread.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@ void *PrintHello(void *threadid)
 
    sleep(1);
    taskid = (long) threadid;
-   printf("Thread %d: %s\n", taskid, messages[taskid]);
+   printf("Thread %ld: %s\n", taskid, messages[taskid]);
    pthread_exit(NULL);
 }
 
