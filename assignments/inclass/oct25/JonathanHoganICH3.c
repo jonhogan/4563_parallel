@@ -12,7 +12,6 @@ int main(void)
 {
     int comm_sz; //number of ranks
     int my_rank; //processes
-    long long smallArray[SIZE/comm_sz];
     long i = 0;  //counter
     
 
@@ -21,16 +20,18 @@ int main(void)
     MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    long long *bigArray;
+    long long smallArray[SIZE/comm_sz];
 
     if (my_rank == 0){
-        long long bigArray[SIZE] = {0};
+        bigArray[SIZE] = malloc(SIZE);
         long long locSum = 0;
 
         for (long i = 0; i < SIZE; i++){
             bigArray[i] = i+1;
         }
         
-        MPI_Scatter(&bigArray, (SIZE/comm_sz), MPI_LONG_LONG, &smallArray,(SIZE/comm_sz), MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+        MPI_Scatter(&smallArray, (SIZE/comm_sz), MPI_LONG_LONG, &smallArray,(SIZE/comm_sz), MPI_LONG_LONG, 0, MPI_COMM_WORLD);
 
       
         for (i = 0; i < (SIZE/comm_sz); i++){
@@ -42,7 +43,7 @@ int main(void)
     }else{
         long long locSum = 0;
 
-        MPI_Gather(&smallArray, (SIZE/comm_sz), MPI_LONG_LONG, &smallArray,(SIZE/comm_sz), MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+        MPI_Scatter(&smallArray, (SIZE/comm_sz), MPI_LONG_LONG, &smallArray,(SIZE/comm_sz), MPI_LONG_LONG, 0, MPI_COMM_WORLD);
         
         for (i = 0; i < (SIZE/comm_sz); i++){
             locSum += smallArray[i];
