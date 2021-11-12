@@ -1,5 +1,5 @@
 class Word:
-    def __ini__(self, text, firstword = False, endword = False )
+    def __ini__(self, text, firstword = False, endword = False ):
         self.word = text
 
 class TrieNode:
