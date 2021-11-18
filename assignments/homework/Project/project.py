@@ -13,6 +13,9 @@ def update_lexiWord(current : str, next : str)-> None:
 
     #Get the probabilities of the input word
     options = lexiWord[current]
+<<<<<<< HEAD
 
     
     
+=======
+>>>>>>> ede60d50d1431f0a8ceb76b3a6ffc9def39c4b23
