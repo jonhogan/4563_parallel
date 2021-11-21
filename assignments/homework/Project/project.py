@@ -16,7 +16,7 @@ def update_lexicon(current : str, next_word : str) -> None:
         lexicon.update({current: {next_word: 1} })
         return
 
-    # Recieve the probabilties of the input word.
+    # Recieve te probabilties of the input word.
     options = lexicon[current]
 
     # Check if the output word is in the propability list.
@@ -43,15 +43,10 @@ for word, transition in lexicon.items():
 # Predict next word
 line = input('> ')
 word = line.strip().split(' ')[-1]
-predicted = "Sup"
-while predicted != None:
-    if word not in lexicon:
-        print('Word not found')
-        predicted = None
-    else:
-    
-        options = lexicon[word]
-        predicted = np.random.choice(list(options.keys()), p=list(options.values()))
-        print(word + ' ' + predicted)
-        word = predicted
+if word not in lexicon:
+    print('Word not found')
+else:
+    options = lexicon[word]
+    predicted = np.random.choice(list(options.keys()), p=list(options.values()))
+    print(line + ' ' + predicted)
           
