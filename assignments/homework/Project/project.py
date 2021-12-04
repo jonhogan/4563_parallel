@@ -88,4 +88,4 @@ while predicted != None:
 end = time.time()
 timer = (end - start)*1000
 
-print('Program ran in %.3f miliseconds' %timer) 
+print('Program ran in {:%.3f} milliseconds'.format(timer)) 
